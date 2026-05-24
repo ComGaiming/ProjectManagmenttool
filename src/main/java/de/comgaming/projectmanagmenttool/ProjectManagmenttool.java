@@ -20,6 +20,7 @@ public class ProjectManagmenttool {
             eingabe = scanner.nextLine();
             switch (eingabe){
                 case "stop", "end"-> CMD_stop.onStop();
+                case "help", "?" -> CMD_stop.onStop();
                 default -> Framework.getLogger().info("console","Please use 'stop' for stopping the Server.\n");
             }
 
