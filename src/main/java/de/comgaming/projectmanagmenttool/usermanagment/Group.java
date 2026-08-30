@@ -1,19 +1,32 @@
 package de.comgaming.projectmanagmenttool.usermanagment;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
-@Entity
-@Table(name = "groups")
-@Getter
-@Setter
 public class Group {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
     private String groupname;
+
+    public Group() {
+    }
+
+    public Group(Long id, String groupname) {
+        this.id = id;
+        this.groupname = groupname;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getGroupname() {
+        return groupname;
+    }
+
+    public void setGroupname(String groupname) {
+        this.groupname = groupname;
+    }
 }
