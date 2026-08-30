@@ -1,0 +1,9 @@
+de\comgaming\projectmanagmenttool\ProjectManagmenttool.class
+de\comgaming\projectmanagmenttool\commands\account\CMD_AddAccount.class
+de\comgaming\projectmanagmenttool\usermanagment\GroupManager.class
+de\comgaming\projectmanagmenttool\utils\SetupManager.class
+de\comgaming\projectmanagmenttool\commands\CMD_Help.class
+de\comgaming\projectmanagmenttool\usermanagment\Account.class
+de\comgaming\projectmanagmenttool\usermanagment\Group.class
+de\comgaming\projectmanagmenttool\usermanagment\AccountManager.class
+de\comgaming\projectmanagmenttool\commands\CMD_stop.class
