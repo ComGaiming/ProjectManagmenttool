@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>de.comgaming</groupId>
+  <artifactId>ProjectManagmenttool</artifactId>
+  <name>Project Management Tool</name>
+  <version>1.0-SNAPSHOT</version>
+  <description>Project Management Tool</description>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.14.0</version>
+        <configuration>
+          <release>${maven.compiler.release}</release>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <shadedArtifactAttached>false</shadedArtifactAttached>
+              <transformers>
+                <transformer>
+                  <mainClass>de.comgaming.projectmanagmenttool.ProjectManagmenttool</mainClass>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.34</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  <properties>
+    <maven.compiler.release>21</maven.compiler.release>
+    <lombok.version>1.18.34</lombok.version>
+    <snakeyaml.version>2.4</snakeyaml.version>
+    <java.version>21</java.version>
+    <jjwt.version>0.11.5</jjwt.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <mariadb.version>3.5.6</mariadb.version>
+    <jbcrypt.version>0.4</jbcrypt.version>
+  </properties>
+</project>
