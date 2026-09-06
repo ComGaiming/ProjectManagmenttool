@@ -44,14 +44,6 @@ public class CMD_AddAccount {
             return;
         }
 
-        Framework.getLogger().info("account", "Passwort:");
-        String password = scanner.nextLine();
-
-        if (password.isBlank()) {
-            Framework.getLogger().info("account", "Passwort darf nicht leer sein.");
-            return;
-        }
-
         Framework.getLogger().info("account", "Gruppe:");
         String groupname = scanner.nextLine().trim();
 
@@ -70,7 +62,7 @@ public class CMD_AddAccount {
         Group group = groupOptional.get();
 
         try {
-            Account account = accountManager.createAccount(username, email, password, group.getId());
+            Account account = accountManager.createAccount(username, email, group.getId());
 
             Framework.getLogger().info("account", "Account erfolgreich erstellt.");
             Framework.getLogger().info("account", "ID: " + account.getId());
@@ -78,6 +70,7 @@ public class CMD_AddAccount {
             Framework.getLogger().info("account", "E-Mail: " + account.getEmail());
             Framework.getLogger().info("account", "Gruppe: " + group.getGroupname());
             Framework.getLogger().info("account", "Registriert: " + account.getRegistDate());
+            Framework.getLogger().info("account", "Ein zufälliges Passwort wurde generiert und per E-Mail versendet.");
 
         } catch (IllegalArgumentException e) {
             Framework.getLogger().info("account", e.getMessage());
