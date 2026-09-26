@@ -11,11 +11,21 @@ public class Account {
     private Date registDate;
     private Date lastLoginDate;
     private Long groupid;
+    private boolean active;
 
     public Account() {
     }
 
-    public Account(Long id, String username, String email, String password, Date registDate, Date lastLoginDate, Long groupid) {
+    public Account(
+            Long id,
+            String username,
+            String email,
+            String password,
+            Date registDate,
+            Date lastLoginDate,
+            Long groupid,
+            boolean active
+    ) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -23,6 +33,7 @@ public class Account {
         this.registDate = registDate;
         this.lastLoginDate = lastLoginDate;
         this.groupid = groupid;
+        this.active = active;
     }
 
     public Long getId() {
@@ -79,5 +90,13 @@ public class Account {
 
     public void setGroupid(Long groupid) {
         this.groupid = groupid;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }
