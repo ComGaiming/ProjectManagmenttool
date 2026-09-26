@@ -2,7 +2,12 @@ package de.comgaming.projectmanagmenttool;
 
 import de.comgaming.projectmanagmenttool.commands.CMD_Help;
 import de.comgaming.projectmanagmenttool.commands.CMD_stop;
-import de.comgaming.projectmanagmenttool.commands.account.*;
+import de.comgaming.projectmanagmenttool.commands.account.CMD_AddAccount;
+import de.comgaming.projectmanagmenttool.commands.account.CMD_GetAccount;
+import de.comgaming.projectmanagmenttool.commands.account.CMD_deleteaccount;
+import de.comgaming.projectmanagmenttool.commands.group.CMD_Updategroupname;
+import de.comgaming.projectmanagmenttool.commands.group.CMD_addGroup;
+import de.comgaming.projectmanagmenttool.restapi.RestAPIServer;
 import de.comgaming.projectmanagmenttool.utils.SetupManager;
 import dev.comgaming.framework.Framework;
 import dev.comgaming.framework.utils.DatabaseManager;
@@ -11,66 +16,92 @@ import java.util.Scanner;
 
 public class ProjectManagmenttool {
 
-    private static DatabaseManager databaseManager = null;
+    private static DatabaseManager databaseManager;
     private static final SetupManager setupManager = new SetupManager();
+    private static final Scanner scanner = new Scanner(System.in);
+    private static RestAPIServer restApiServer;
 
     public static DatabaseManager getDatabaseManager() {
         return databaseManager;
     }
 
+    public static Scanner getScanner() {
+        return scanner;
+    }
+
     public static void main(String[] args) {
-        Framework framework = new Framework();
-        framework.init();
-        Framework.getLogger().info("backend", "Backend of ComPlaning is now starting..");
+        new Framework().init();
+        Framework.getLogger().info("backend", "Backend is starting..");
 
-        databaseManager = new DatabaseManager("database", true);
+        try {
+            databaseManager = new DatabaseManager("database", true);
+            setupManager.checkSetup();
 
-        setupManager.checkSetup();
-        Framework.getLogger().info("backend", "Backend of ComPlaning is now started");
-        Scanner scanner = new Scanner(System.in);
+            restApiServer = new RestAPIServer();
+            restApiServer.start();
+        } catch (Exception e) {
+            Framework.getLogger().error("backend", "Fehler beim Starten: " + e.getMessage());
+            onStop();
+            return;
+        }
 
+        Framework.getLogger().info("backend", "Backend started");
+        consoleLoop();
+    }
+
+    private static void consoleLoop() {
         while (true) {
             System.out.print("> ");
-            String input;
+
+            if (!scanner.hasNextLine()) break;
+
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) continue;
+
+            String[] parts = input.split("\\s+");
+            String command = parts[0].toLowerCase();
+            String[] args = new String[parts.length - 1];
+
+            System.arraycopy(parts, 1, args, 0, args.length);
+
             try {
-                input = scanner.nextLine().trim();
+                switch (command) {
+                    case "stop", "end", "exit" -> CMD_stop.onStop();
+                    case "help", "?" -> CMD_Help.onCommand();
+                    case "createaccount", "addaccount" -> CMD_AddAccount.onCommand(args);
+                    case "getaccount" -> CMD_GetAccount.onCommand(args);
+                    case "deleteaccount" -> CMD_deleteaccount.onCommand(args);
+                    case "creategroup", "addgroup" -> CMD_addGroup.onCommand();
+                    case "updategroupname" -> CMD_Updategroupname.onCommand(args);
+                    default -> Framework.getLogger().info("console", "Unbekannter Befehl: " + command);
+                }
             } catch (Exception e) {
-                Framework.getLogger().error("console", "Fehler beim Lesen der Konsoleneingabe: " + e.getMessage());
-                break;
-            }
-
-            if (input.isEmpty()) {
-                continue;
-            }
-
-            String[] commandParts = input.split("\\s+");
-            String command = commandParts[0].toLowerCase();
-            String[] commandArgs = new String[Math.max(0, commandParts.length - 1)];
-            if (commandParts.length > 1) {
-                System.arraycopy(commandParts, 1, commandArgs, 0, commandParts.length - 1);
-            }
-            switch (command) {
-                case "stop", "end" -> CMD_stop.onStop();
-                case "help", "?" -> CMD_Help.onCommand();
-                case "createaccount" -> CMD_AddAccount.onCommand();
-                case "getaccount" -> CMD_GetAccount.onCommand(commandArgs);
-                case "deleteaccount" -> CMD_deleteaccount.onCommand(commandArgs);
-                default -> Framework.getLogger().info("console", "Unbekannter Befehl '" + command + "'. Nutze 'help' für eine Liste der Befehle.");
+                Framework.getLogger().error("console", "Fehler: " + e.getMessage());
             }
         }
-        scanner.close();
+
+        onStop();
     }
 
     public static void onStop() {
         Framework.getLogger().info("console", "Backend is stopping");
-        if (databaseManager != null) {
+        if (restApiServer != null) {
             try {
-                databaseManager.getConnection().close();
-                Framework.getLogger().info("console", "Database connection closed");
+                restApiServer.stop();
             } catch (Exception e) {
-                Framework.getLogger().error("console", "Fehler beim Schließen der Datenbankverbindung: " + e.getMessage());
+                Framework.getLogger().error("restapi", "Fehler beim Stoppen: " + e.getMessage());
             }
         }
+
+        if (databaseManager != null) {
+            try {
+                if (databaseManager.getConnection() != null && !databaseManager.getConnection().isClosed())
+                    databaseManager.getConnection().close();
+            } catch (Exception e) {
+                Framework.getLogger().error("database", "Fehler beim Schließen: " + e.getMessage());
+            }
+        }
+
         Framework.getLogger().info("console", "Backend is stopped");
         System.exit(0);
     }
