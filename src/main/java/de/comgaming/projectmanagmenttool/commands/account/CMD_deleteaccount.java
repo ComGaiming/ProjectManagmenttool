@@ -4,6 +4,7 @@ import de.comgaming.projectmanagmenttool.usermanagment.Account;
 import de.comgaming.projectmanagmenttool.usermanagment.AccountManager;
 import dev.comgaming.framework.Framework;
 
+import java.util.Locale;
 import java.util.Optional;
 
 public class CMD_deleteaccount {
@@ -11,7 +12,6 @@ public class CMD_deleteaccount {
     private static final AccountManager accountManager = new AccountManager();
 
     public static void onCommand(String[] args) {
-
         if (args == null || args.length == 0) {
             sendHelp();
             return;
@@ -21,11 +21,12 @@ public class CMD_deleteaccount {
         String username = null;
         String email = null;
         boolean verbose = false;
+        boolean confirm = false;
 
         for (int i = 0; i < args.length; i++) {
+            String argument = args[i].toLowerCase(Locale.ROOT);
 
-            switch (args[i].toLowerCase()) {
-
+            switch (argument) {
                 case "--id", "-id" -> {
                     if (i + 1 >= args.length) {
                         error("--id benötigt eine AccountID.");
@@ -59,6 +60,8 @@ public class CMD_deleteaccount {
                 }
 
                 case "--verbose", "-v" -> verbose = true;
+
+                case "--confirm", "-c" -> confirm = true;
 
                 case "--help", "-h" -> {
                     sendHelp();
@@ -94,6 +97,11 @@ public class CMD_deleteaccount {
 
         if (searchArguments > 1) {
             error("Es darf nur eine Suchmethode verwendet werden.");
+            return;
+        }
+
+        if (!confirm) {
+            error("Löschen wurde nicht bestätigt. Verwende --confirm.");
             return;
         }
 
@@ -134,30 +142,27 @@ public class CMD_deleteaccount {
 
         if (verbose) {
             info("Account gefunden:");
-            info("  ID: " + foundAccount.getId());
-            info("  Username: " + foundAccount.getUsername());
-            info("  E-Mail: " + foundAccount.getEmail());
-            info("  Gruppe: " + foundAccount.getGroupid());
+            info("ID: " + foundAccount.getId());
+            info("Username: " + foundAccount.getUsername());
+            info("E-Mail: " + foundAccount.getEmail());
+            info("Gruppe: " + foundAccount.getGroupid());
+            info("Status: " + (foundAccount.isActive() ? "Aktiv" : "Deaktiviert"));
+            info("Registriert: " + foundAccount.getRegistDate());
+            info("Letzter Login: " + foundAccount.getLastLoginDate());
             info("Lösche Account...");
         }
 
         boolean deleted = accountManager.deleteById(foundAccount.getId());
 
-        if (deleted) {
-            info(
-                    "Account erfolgreich gelöscht: "
-                            + foundAccount.getUsername()
-                            + " (ID: "
-                            + foundAccount.getId()
-                            + ")"
-            );
-
-            if (verbose) {
-                info("Löschvorgang erfolgreich abgeschlossen.");
-            }
-
-        } else {
+        if (!deleted) {
             error("Account konnte nicht gelöscht werden.");
+            return;
+        }
+
+        info("Account erfolgreich gelöscht: " + foundAccount.getUsername() + " (ID: " + foundAccount.getId() + ")");
+
+        if (verbose) {
+            info("Löschvorgang erfolgreich abgeschlossen.");
         }
     }
 
@@ -166,15 +171,16 @@ public class CMD_deleteaccount {
                 
                 Verwendung:
                 
-                  deleteaccount --id <AccountID>
-                  deleteaccount --username <Username>
-                  deleteaccount --email <E-Mail>
+                  deleteaccount --id <AccountID> --confirm
+                  deleteaccount --username <Username> --confirm
+                  deleteaccount --email <E-Mail> --confirm
                 
                 Optionen:
                 
                   --id <ID>             Account über ID auswählen
                   --username <Name>     Account über Username auswählen
                   --email <E-Mail>      Account über E-Mail auswählen
+                  --confirm             Löschung bestätigen
                   --verbose             Ausführliche Ausgabe
                   --help                Hilfe anzeigen
                 
@@ -183,16 +189,17 @@ public class CMD_deleteaccount {
                   -id <ID>
                   -u <Username>
                   -e <E-Mail>
+                  -c
                   -v
                   -h
                 
                 Beispiele:
                 
-                  deleteaccount --id 15
-                  deleteaccount --id 15 --verbose
-                  deleteaccount --username Max
-                  deleteaccount --username Max --verbose
-                  deleteaccount --email max@example.com -v
+                  deleteaccount --id 15 --confirm
+                  deleteaccount --id 15 --confirm --verbose
+                  deleteaccount --username Max --confirm
+                  deleteaccount --username Max --confirm --verbose
+                  deleteaccount --email max@example.com --confirm -v
                 """);
     }
 

@@ -3,7 +3,6 @@ package de.comgaming.projectmanagmenttool.usermanagment;
 public class Group {
 
     private Long id;
-
     private String groupname;
 
     public Group() {

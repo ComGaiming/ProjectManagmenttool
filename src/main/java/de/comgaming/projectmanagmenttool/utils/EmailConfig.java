@@ -20,140 +20,78 @@ public class EmailConfig {
 
     public EmailConfig() {
 
-        DirectoryHandler directoryHandler =
-                new DirectoryHandler(CONFIG_DIRECTORY);
+        DirectoryHandler directoryHandler = new DirectoryHandler(CONFIG_DIRECTORY);
 
         if (!directoryHandler.existsDirectory(CONFIG_DIRECTORY)) {
-
-            String result =
-                    directoryHandler.generateDirectory();
-
+            String result = directoryHandler.generateDirectory();
             if (!directoryHandler.existsDirectory(CONFIG_DIRECTORY)) {
-                throw new IllegalStateException(
-                        "Config-Verzeichnis konnte nicht erstellt werden: "
-                                + result
-                );
+                throw new IllegalStateException("Config-Verzeichnis konnte nicht erstellt werden: " + result);
             }
         }
 
-        String filePath =
-                directoryHandler.getAbsolutePath()
-                        + File.separator
-                        + CONFIG_FILE;
-
-        FileManager fileManager =
-                new FileManager(filePath);
+        String filePath = directoryHandler.getAbsolutePath() + File.separator + CONFIG_FILE;
+        FileManager fileManager = new FileManager(filePath);
 
         if (!fileManager.exists()) {
-            throw new IllegalStateException(
-                    "E-Mail-Konfiguration nicht gefunden: "
-                            + filePath
-            );
+            throw new IllegalStateException("E-Mail-Konfiguration nicht gefunden: " + filePath);
         }
 
-        String content = String.join(
-                System.lineSeparator(),
-                fileManager.readAll()
-        );
+        String content = String.join(System.lineSeparator(), fileManager.readAll());
 
         if (content.isBlank()) {
-            throw new IllegalStateException(
-                    "Die E-Mail-Konfiguration ist leer."
-            );
+            throw new IllegalStateException("Die E-Mail-Konfiguration ist leer.");
         }
 
         try {
-
             Yaml yaml = new Yaml();
-
-            Map<String, Object> config =
-                    yaml.load(content);
+            Map<String, Object> config = yaml.load(content);
 
             if (config == null) {
-                throw new IllegalStateException(
-                        "Die email.yml konnte nicht gelesen werden."
-                );
+                throw new IllegalStateException("Die email.yml konnte nicht gelesen werden.");
             }
 
-            Map<String, Object> email =
-                    getMap(config, "email");
-
-            Map<String, Object> smtp =
-                    getMap(email, "smtp");
-
-            this.smtpHost =
-                    getString(smtp, "host");
-
-            this.smtpPort =
-                    getInteger(smtp, "port");
-
-            this.username =
-                    getString(smtp, "username");
-
-            this.password =
-                    getString(smtp, "password");
-
-            this.sender =
-                    getString(email, "sender");
+            Map<String, Object> email = getMap(config, "email");
+            Map<String, Object> smtp = getMap(email, "smtp");
+            this.smtpHost = getString(smtp, "host");
+            this.smtpPort = getInteger(smtp, "port");
+            this.username = getString(smtp, "username");
+            this.password = getString(smtp, "password");
+            this.sender = getString(email, "sender");
 
         } catch (Exception e) {
-
-            throw new IllegalStateException(
-                    "Fehler beim Laden der email.yml.",
-                    e
-            );
+            throw new IllegalStateException("Fehler beim Laden der email.yml.", e);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> getMap(
-            Map<String, Object> parent,
-            String key
-    ) {
+    private Map<String, Object> getMap(Map<String, Object> parent, String key) {
 
         Object value = parent.get(key);
 
         if (!(value instanceof Map<?, ?>)) {
-            throw new IllegalStateException(
-                    "Konfiguration '" + key
-                            + "' fehlt oder ist ungültig."
-            );
+            throw new IllegalStateException("Konfiguration '" + key + "' fehlt oder ist ungültig.");
         }
 
         return (Map<String, Object>) value;
     }
 
-    private String getString(
-            Map<String, Object> map,
-            String key
-    ) {
+    private String getString(Map<String, Object> map, String key) {
 
         Object value = map.get(key);
 
-        if (value == null ||
-                value.toString().isBlank()) {
-
-            throw new IllegalStateException(
-                    "Konfiguration '" + key
-                            + "' fehlt oder ist leer."
-            );
+        if (value == null || value.toString().isBlank()) {
+            throw new IllegalStateException("Konfiguration '" + key + "' fehlt oder ist leer.");
         }
 
         return value.toString();
     }
 
-    private int getInteger(
-            Map<String, Object> map,
-            String key
-    ) {
+    private int getInteger(Map<String, Object> map, String key) {
 
         Object value = map.get(key);
 
         if (!(value instanceof Number)) {
-            throw new IllegalStateException(
-                    "Konfiguration '" + key
-                            + "' muss eine Zahl sein."
-            );
+            throw new IllegalStateException("Konfiguration '" + key + "' muss eine Zahl sein.");
         }
 
         return ((Number) value).intValue();
