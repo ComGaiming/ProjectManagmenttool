@@ -18,13 +18,10 @@ public class PermissionManager {
         if (id == null) return Optional.empty();
 
         try (PreparedStatement s = databaseManager.getConnection().prepareStatement("SELECT * FROM permissions WHERE permissionid = ?")) {
-
             s.setLong(1, id);
-
             try (ResultSet r = s.executeQuery()) {
                 return r.next() ? Optional.of(map(r)) : Optional.empty();
             }
-
         } catch (SQLException e) {
             throw new RuntimeException("Fehler beim Suchen der Permission.", e);
         }
@@ -32,16 +29,11 @@ public class PermissionManager {
 
     public Optional<Permission> findByName(String name) {
         if (name == null || name.isBlank()) return Optional.empty();
-
-        try (PreparedStatement s = databaseManager.getConnection().prepareStatement(
-                "SELECT * FROM permissions WHERE permissionname = ?")) {
-
+        try (PreparedStatement s = databaseManager.getConnection().prepareStatement("SELECT * FROM permissions WHERE permissionname = ?")) {
             s.setString(1, name.trim());
-
             try (ResultSet r = s.executeQuery()) {
                 return r.next() ? Optional.of(map(r)) : Optional.empty();
             }
-
         } catch (SQLException e) {
             throw new RuntimeException("Fehler beim Suchen der Permission.", e);
         }
@@ -49,10 +41,9 @@ public class PermissionManager {
 
     public List<Permission> findAll() {
         List<Permission> list = new ArrayList<>();
-
-        try (PreparedStatement s = databaseManager.getConnection().prepareStatement(
-                "SELECT * FROM permissions ORDER BY permissionname ASC");
-             ResultSet r = s.executeQuery()) {
+        try (
+            PreparedStatement s = databaseManager.getConnection().prepareStatement("SELECT * FROM permissions ORDER BY permissionname ASC");
+            ResultSet r = s.executeQuery()) {
 
             while (r.next()) list.add(map(r));
 
@@ -72,19 +63,15 @@ public class PermissionManager {
         if (findByName(name).isPresent())
             throw new IllegalArgumentException("Permission existiert bereits.");
 
-        try (PreparedStatement s = databaseManager.getConnection().prepareStatement(
-                "INSERT INTO permissions (permissionname) VALUES (?)",
-                Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement s = databaseManager.getConnection().prepareStatement("INSERT INTO permissions (permissionname) VALUES (?)", Statement.RETURN_GENERATED_KEYS)) {
 
             s.setString(1, name);
-
             if (s.executeUpdate() == 0)
                 throw new RuntimeException("Permission konnte nicht erstellt werden.");
 
             try (ResultSet r = s.getGeneratedKeys()) {
                 if (!r.next())
                     throw new RuntimeException("Keine PermissionID erhalten.");
-
                 return new Permission(r.getLong(1), name);
             }
 
@@ -96,12 +83,9 @@ public class PermissionManager {
     public boolean delete(Long id) {
         if (id == null) return false;
 
-        try (PreparedStatement s = databaseManager.getConnection().prepareStatement(
-                "DELETE FROM permissions WHERE permissionid = ?")) {
-
+        try (PreparedStatement s = databaseManager.getConnection().prepareStatement("DELETE FROM permissions WHERE permissionid = ?")) {
             s.setLong(1, id);
             return s.executeUpdate() > 0;
-
         } catch (SQLException e) {
             throw new RuntimeException("Fehler beim Löschen der Permission.", e);
         }
@@ -116,14 +100,10 @@ public class PermissionManager {
         if (findById(permissionId).isEmpty())
             throw new IllegalArgumentException("Permission existiert nicht.");
 
-        try (PreparedStatement s = databaseManager.getConnection().prepareStatement(
-                "INSERT IGNORE INTO grouppermissions (groupid, permissionid) VALUES (?, ?)")) {
-
+        try (PreparedStatement s = databaseManager.getConnection().prepareStatement("INSERT IGNORE INTO grouppermissions (groupid, permissionid) VALUES (?, ?)")) {
             s.setLong(1, groupId);
             s.setLong(2, permissionId);
-
             return s.executeUpdate() > 0;
-
         } catch (SQLException e) {
             throw new RuntimeException("Fehler beim Zuweisen der Permission.", e);
         }
@@ -132,14 +112,10 @@ public class PermissionManager {
     public boolean removeFromGroup(Long groupId, Long permissionId) {
         if (groupId == null || permissionId == null) return false;
 
-        try (PreparedStatement s = databaseManager.getConnection().prepareStatement(
-                "DELETE FROM grouppermissions WHERE groupid = ? AND permissionid = ?")) {
-
+        try (PreparedStatement s = databaseManager.getConnection().prepareStatement("DELETE FROM grouppermissions WHERE groupid = ? AND permissionid = ?")) {
             s.setLong(1, groupId);
             s.setLong(2, permissionId);
-
             return s.executeUpdate() > 0;
-
         } catch (SQLException e) {
             throw new RuntimeException("Fehler beim Entfernen der Permission.", e);
         }
@@ -147,9 +123,7 @@ public class PermissionManager {
 
     public List<Permission> findByGroupId(Long groupId) {
         List<Permission> list = new ArrayList<>();
-
         if (groupId == null) return list;
-
         String sql = """
             SELECT p.*
             FROM permissions p
@@ -159,18 +133,13 @@ public class PermissionManager {
             """;
 
         try (PreparedStatement s = databaseManager.getConnection().prepareStatement(sql)) {
-
             s.setLong(1, groupId);
-
             try (ResultSet r = s.executeQuery()) {
-                while (r.next())
-                    list.add(map(r));
+                while (r.next()) list.add(map(r));
             }
-
         } catch (SQLException e) {
             throw new RuntimeException("Fehler beim Abrufen der Gruppen-Permissions.", e);
         }
-
         return list;
     }
 
@@ -189,40 +158,29 @@ public class PermissionManager {
             """;
 
         try (PreparedStatement s = databaseManager.getConnection().prepareStatement(sql)) {
-
             s.setLong(1, groupId);
             s.setString(2, permission.trim());
-
             try (ResultSet r = s.executeQuery()) {
                 return r.next();
             }
-
         } catch (SQLException e) {
             throw new RuntimeException("Fehler beim Prüfen der Permission.", e);
         }
     }
 
     private boolean groupExists(Long groupId) {
-        try (PreparedStatement s = databaseManager.getConnection().prepareStatement(
-                "SELECT 1 FROM groups WHERE groupid = ?")) {
-
+        try (PreparedStatement s = databaseManager.getConnection().prepareStatement("SELECT 1 FROM groups WHERE groupid = ?")) {
             s.setLong(1, groupId);
-
             try (ResultSet r = s.executeQuery()) {
                 return r.next();
             }
-
         } catch (SQLException e) {
             throw new RuntimeException("Fehler beim Prüfen der Gruppe.", e);
         }
     }
 
     private Permission map(ResultSet r) throws SQLException {
-        return new Permission(
-                r.getLong("permissionid"),
-                r.getString("permissionname")
-        );
+        return new Permission(r.getLong("permissionid"), r.getString("permissionname"));
     }
-
 
 }

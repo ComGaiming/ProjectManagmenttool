@@ -69,11 +69,7 @@ public class GroupPermissionManager {
     }
 
     public boolean addPermission(Long groupid, String permissionname) {
-        Permission permission = permissionManager.findByName(permissionname)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Permission '" + permissionname + "' wurde nicht gefunden."
-                ));
-
+        Permission permission = permissionManager.findByName(permissionname).orElseThrow(() -> new IllegalArgumentException("Permission '" + permissionname + "' wurde nicht gefunden."));
         return addPermission(groupid, permission.getId());
     }
 
@@ -97,11 +93,7 @@ public class GroupPermissionManager {
     }
 
     public boolean removePermission(Long groupid, String permissionname) {
-        Permission permission = permissionManager.findByName(permissionname)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Permission '" + permissionname + "' wurde nicht gefunden."
-                ));
-
+        Permission permission = permissionManager.findByName(permissionname).orElseThrow(() -> new IllegalArgumentException("Permission '" + permissionname + "' wurde nicht gefunden."));
         return removePermission(groupid, permission.getId());
     }
 
@@ -120,10 +112,8 @@ public class GroupPermissionManager {
                 """;
 
         List<Permission> permissions = new ArrayList<>();
-
         try (PreparedStatement statement = databaseManager.getConnection().prepareStatement(sql)) {
             statement.setLong(1, groupid);
-
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     permissions.add(mapPermission(resultSet));
@@ -179,9 +169,7 @@ public class GroupPermissionManager {
         }
 
         if (groupManager.findById(groupid).isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Gruppe mit der ID " + groupid + " existiert nicht."
-            );
+            throw new IllegalArgumentException("Gruppe mit der ID " + groupid + " existiert nicht.");
         }
     }
 
@@ -189,18 +177,12 @@ public class GroupPermissionManager {
         if (permissionid == null) {
             throw new IllegalArgumentException("PermissionID darf nicht null sein.");
         }
-
         if (permissionManager.findById(permissionid).isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Permission mit der ID " + permissionid + " existiert nicht."
-            );
+            throw new IllegalArgumentException("Permission mit der ID " + permissionid + " existiert nicht.");
         }
     }
 
     private Permission mapPermission(ResultSet resultSet) throws SQLException {
-        return new Permission(
-                resultSet.getLong("permissionid"),
-                resultSet.getString("permissionname")
-        );
+        return new Permission(resultSet.getLong("permissionid"),resultSet.getString("permissionname"));
     }
 }

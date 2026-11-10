@@ -140,16 +140,13 @@ public class SetupManager {
 
         file.writeInNextFreeLine("secret: \"" + secret + "\"");
         file.writeInNextFreeLine("port: " + port);
-
         Framework.getLogger().info("setup", "REST-API-Konfiguration gespeichert.");
     }
 
     private void setupDatabase() {
         try {
             Connection connection = ProjectManagmenttool.getDatabaseManager().getConnection();
-
             connection.prepareStatement("USE complaning").execute();
-
             connection.prepareStatement("""
                     CREATE TABLE IF NOT EXISTS groups (
                         groupid BIGINT AUTO_INCREMENT PRIMARY KEY,
